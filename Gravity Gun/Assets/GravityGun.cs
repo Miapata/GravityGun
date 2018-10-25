@@ -5,9 +5,12 @@ using UnityEngine;
 public class GravityGun : MonoBehaviour
 {
     public GameObject gravityHolder;
+    public float gravityForce;
     public bool hasItem;
-
+    public float slerpSpeed;
+    public float grabDistance;
     private GameObject toSlerp;
+    private Rigidbody slerpRigidbody;
     // Use this for initialization
     void Start()
     {
@@ -20,7 +23,7 @@ public class GravityGun : MonoBehaviour
         RaycastHit raycast;
         if (Input.GetMouseButton(0))
         {
-            Physics.Raycast(gravityHolder.transform.position, transform.forward, out raycast);
+            Physics.Raycast(gravityHolder.transform.position, transform.forward, out raycast,grabDistance);
             if (raycast.collider != null)
             {
                 if (raycast.collider.tag == "Object_Interactable")
@@ -31,6 +34,20 @@ public class GravityGun : MonoBehaviour
 
 
 
+        }
+
+        if (Input.GetMouseButton(1))
+        {
+            if (hasItem == false)
+                return;
+            else
+            {
+                toSlerp.transform.parent = null;
+                slerpRigidbody.isKinematic = false;
+                toSlerp.GetComponent<Rigidbody>().AddForce(transform.forward * gravityForce, ForceMode.Impulse);
+                toSlerp = null;
+                hasItem = false;
+            }
         }
 
         if (toSlerp == null)
@@ -44,7 +61,14 @@ public class GravityGun : MonoBehaviour
             return;
         else
         {
-            hitGameObject.transform.position = Vector3.Slerp(transform.position, gravityHolder.transform.position,  1f);
+            slerpRigidbody = hitGameObject.GetComponent<Rigidbody>();
+            for (float t = 0.0f; t < slerpSpeed; t += Time.deltaTime)
+            {
+                hitGameObject.transform.position = Vector3.Slerp(transform.position, gravityHolder.transform.position, 1f);
+            }
+            slerpRigidbody.isKinematic = true;
+            hitGameObject.transform.parent = transform;
+            hasItem = true;
         }
     }
 }
