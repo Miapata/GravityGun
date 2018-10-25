@@ -7,7 +7,7 @@ public class GravityGun : MonoBehaviour
     public GameObject gravityHolder;
     public float gravityForce;
     public bool hasItem;
-    public float slerpSpeed;
+    public float lerpSpeed;
     public float grabDistance;
     private GameObject toSlerp;
     private Rigidbody slerpRigidbody;
@@ -23,7 +23,9 @@ public class GravityGun : MonoBehaviour
         RaycastHit raycast;
         if (Input.GetMouseButton(0))
         {
-            Physics.Raycast(gravityHolder.transform.position, transform.forward, out raycast,grabDistance);
+            if (hasItem == true)
+                return;
+            Physics.Raycast(gravityHolder.transform.position, transform.forward, out raycast, grabDistance);
             if (raycast.collider != null)
             {
                 if (raycast.collider.tag == "Object_Interactable")
@@ -62,9 +64,9 @@ public class GravityGun : MonoBehaviour
         else
         {
             slerpRigidbody = hitGameObject.GetComponent<Rigidbody>();
-            for (float t = 0.0f; t < slerpSpeed; t += Time.deltaTime)
+            for (float t = 0.0f; t < lerpSpeed; t += Time.deltaTime)
             {
-                hitGameObject.transform.position = Vector3.Slerp(transform.position, gravityHolder.transform.position, 1f);
+                hitGameObject.transform.position = Vector3.Slerp(hitGameObject.transform.position, gravityHolder.transform.position, lerpSpeed);
             }
             slerpRigidbody.isKinematic = true;
             hitGameObject.transform.parent = transform;
